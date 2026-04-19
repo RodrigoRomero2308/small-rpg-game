@@ -14,6 +14,7 @@
 1. Definir **identidad de zona** y qué sistemas consultan esa clave (combate ambiental, música, tablas de spawn).
 2. Separar **layout geométrico** de **reglas de fase** (quién decide qué versión del mundo está activa).
 3. Prever **jugadores a distintas fases**: interacción social, party, visibilidad.
+4. En **Godot**, una **zona** puede mapearse a una escena (`*.tscn`) o a un `Area3D` que registra entrada/salida; streaming avanzado solo cuando el MVP lo exija — ver [`godot-engine.md`](godot-engine.md).
 
 ## Fuera de mandato
 

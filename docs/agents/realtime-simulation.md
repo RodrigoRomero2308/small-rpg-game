@@ -16,6 +16,7 @@ Definir el **corazón del bucle**: tick/update, timestep (fijo vs variable), ord
 2. Nombrar **autoridad**: qué sistema puede sobrescribir estado de qué otro.
 3. Tratar **tiempo de juego** como eje explícito: `now`, duraciones, timestamps de fin de efecto, no “paso 3 del turno”.
 4. Si hay red: separar **simulación autoritativa** de **predicción cliente** (aunque sea plan futuro, no mezclar conceptos en un solo PR).
+5. En **Godot**, alinear el pipeline con **`_physics_process` (física)** para estado que afecta colisiones / `CharacterBody3D`, y dejar en **`_process`** lo que sea puramente visual — ver [`godot-engine.md`](godot-engine.md).
 
 ## Fuera de mandato
 

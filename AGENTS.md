@@ -2,6 +2,8 @@
 
 Este repositorio explora un **RPG pequeño** con mentalidad de **ingeniería de sistemas**, no de lista de features. Cualquier chat de Cursor en este repo debe alinear propuestas con esta visión.
 
+**Motor:** el desarrollo se orienta a **Godot 4.x**. Las recomendaciones de implementación deben ser **idiomáticas** (escenas/nodos, `_physics_process` vs `_process`, señales, `Resource`, `InputMap`, etc.). Detalle en [`docs/agents/godot-engine.md`](docs/agents/godot-engine.md). Referencia de **assets de terceros** (CC0/MIT y enlaces): [`docs/third-party-assets.md`](docs/third-party-assets.md).
+
 **Combates y momentos a priori “tipo MMO” (referencia: WoW):** simulación en **tiempo real** donde el jugador lanza **acciones** (instantáneas, casteos, canales) con **cadencia** (GCD o equivalente), **cooldowns** y lectura del espacio. **No** es el marco por defecto el combate **por turnos**; si aparece algo por turnos, debe ser un **subsistema acotado** y explícito (p. ej. minijuego), no el supuesto del diseño.
 
 ## Roles de agente (invocación bajo demanda)
