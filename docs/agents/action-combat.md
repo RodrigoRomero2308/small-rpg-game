@@ -31,3 +31,4 @@ Diseñar el **sistema de habilidades** y su resolución en **tiempo real**: cola
 
 - Con [`realtime-simulation.md`](realtime-simulation.md): orden de tick y timestamps.
 - Con [`ai-encounters.md`](ai-encounters.md): telegrafía de ataques del enemigo y ventanas del jugador.
+- Con [`godot-engine.md`](godot-engine.md): `Area3D`/`ShapeCast3D`/`RayCast3D` para validación espacial, `AnimationTree` si la telegrafía va ligada a animación — sin duplicar reglas fuera del sistema de combate.

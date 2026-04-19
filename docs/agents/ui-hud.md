@@ -14,6 +14,7 @@
 1. Para cada elemento: **fuente de datos** (evento, snapshot, polling controlado) y **frecuencia de actualización**.
 2. Definir **prioridad visual** en combate: qué no puede tapar qué.
 3. Accesibilidad básica: tamaño, color+forma (no solo color), rebinding si aplica.
+4. En **Godot**, HUD en `CanvasLayer` o subviewport dedicado; preferir **señales** o un bus de eventos hacia la UI en lugar de que `Control` llame profundo a nodos de gameplay.
 
 ## Fuera de mandato
 
