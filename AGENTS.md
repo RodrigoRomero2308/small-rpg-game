@@ -2,6 +2,12 @@
 
 Este repositorio explora un **RPG pequeño** con mentalidad de **ingeniería de sistemas**, no de lista de features. Cualquier chat de Cursor en este repo debe alinear propuestas con esta visión.
 
+**Combates y momentos a priori “tipo MMO” (referencia: WoW):** simulación en **tiempo real** donde el jugador lanza **acciones** (instantáneas, casteos, canales) con **cadencia** (GCD o equivalente), **cooldowns** y lectura del espacio. **No** es el marco por defecto el combate **por turnos**; si aparece algo por turnos, debe ser un **subsistema acotado** y explícito (p. ej. minijuego), no el supuesto del diseño.
+
+## Roles de agente (invocación bajo demanda)
+
+Las instrucciones detalladas por dominio viven en [`docs/agents/`](docs/agents/README.md). **No hace falta cargarlas todas:** invocá el rol que corresponda (o un **coordinador** que acote alcance) cuando trabajes esa parte del juego.
+
 ## Principio central
 
 **Pensar en sistemas, no en features.** Una “feature” es lo que el jugador percibe; un **sistema** es la pieza reutilizable con reglas claras, datos, límites y puntos de integración. Antes de proponer “añadir X”, se nombra **qué sistema** lo sostiene y **qué contrato** (entradas, salidas, estado) expone.
@@ -18,18 +24,18 @@ Si el usuario pide algo ambiguo, **reformular en términos de sistemas** y confi
 
 ## Progresión sugerida (de lo básico hacia afuera)
 
-Orden orientativo; no es dogma, pero **respeta “poco a la vez”**:
+Orden orientativo para **tiempo real por acciones**; no es dogma, pero **respeta “poco a la vez”**:
 
-1. **Bucle de juego** — tick/update, inicio/fin de frame o turno, capa mínima de “mundo” o escena.
+1. **Bucle de juego** — tick/update por frame o timestep fijo, capa mínima de “mundo” o escena.
 2. **Entidades y ciclo de vida** — crear, actualizar, destruir; identidad estable (IDs).
 3. **Representación de estado** — dónde vive la verdad (modelo), separada de presentación si aplica.
-4. **Input** — acciones abstractas (mover, confirmar), no teclas pegadas a lógica de dominio.
-5. **Movimiento o posición** — grid o continuo; colisiones solo cuando el movimiento exista.
-6. **Turnos o tiempo** — quién actúa y cuándo; orden determinista.
-7. **Acciones / intención** — una cola o resolución de acciones con reglas explícitas.
-8. **Recursos del actor** — por ejemplo energía o vida, **un** recurso primero.
-9. **Inventario o equipamiento** — después de que existan entidades y acciones coherentes.
-10. **Contenido** (mapas, enemigos, objetos) — datos que **consumen** sistemas ya existentes.
+4. **Input** — comandos abstractos (mover, usar habilidad en slot N, cancelar cast), no teclas pegadas a lógica de dominio.
+5. **Movimiento o posición** — continuo o grid; colisiones cuando el movimiento exista; knockback/root después si aplica.
+6. **Tiempo de simulación** — `now`, duraciones, timestamps de fin de efecto; orden de actualización de subsistemas **por tick**, no “rondas”.
+7. **Combate por acciones** — validación (rango, LoS, facing), colas cortas o reglas de lockout, **GCD/cooldowns**, casts cancelables.
+8. **Recursos del actor** — vida + **un** recurso de habilidad primero (maná, energía, enfado…); ampliar después.
+9. **Inventario o equipamiento** — cuando el actor y el combate base ya tengan fronteras claras.
+10. **Contenido** (mapas, enemigos, objetos, quests) — datos que **consumen** sistemas ya existentes.
 
 Saltar niveles “porque es divertido” está bien solo si el **salto** se documenta como deuda consciente y el cambio sigue siendo pequeño.
 
@@ -45,7 +51,7 @@ Saltar niveles “porque es divertido” está bien solo si el **salto** se docu
 
 Para ideas nuevas o rediseños, priorizar:
 
-- **Invariantes** — qué nunca debe ocurrir (p. ej. dos acciones en el mismo slot ilegalmente).
+- **Invariantes** — qué nunca debe ocurrir (p. ej. gastar recurso sin aplicar efecto, o aplicar efecto sin coste cuando el coste es obligatorio).
 - **Determinismo** — si importa para replay, tests o multijugador futuro.
 - **Telemetría / depuración** — qué se puede loguear o inspeccionar con un sistema nuevo.
 - **Pruebas** — qué caso mínimo prueba el sistema sin depender del resto del juego.
