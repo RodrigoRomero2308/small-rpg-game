@@ -59,14 +59,67 @@ export GODOT_BIN="$(which godot4 || which godot)"
 
 No sustituye una pasada manual de “¿se siente bien el GCD?”; eso sigue siendo en editor con overlay.
 
+## Captura de video / screenshots (agente o CI)
+
+`./scripts/verify-godot.sh` **no graba video**: corre `--headless` sin ventana ni frames visibles.
+
+Para **prueba visual reproducible** (PNG + MP4):
+
+```bash
+./scripts/verify-godot.sh          # primero: Godot en .tools/
+./scripts/capture-gameplay.sh
+```
+
+Salida en `artifacts/capture-<timestamp>/`:
+
+- `frame_0000.png`, `frame_0001.png`, …
+- `demo.mp4` (si hay `ffmpeg`)
+- `meta.txt` (conteo de frames, duración)
+
+### Cómo funciona
+
+| Pieza | Rol |
+|-------|-----|
+| `xvfb-run` | Display virtual 640×360 en servidores sin pantalla |
+| `demo_playback.gd` | Carga `main.tscn`, simula movimiento + slots 1–3, guarda frames |
+| `ffmpeg` | Monta PNG → `demo.mp4` |
+
+Variables opcionales:
+
+| Variable | Default | Descripción |
+|----------|---------|-------------|
+| `CAPTURE_DIR` | `artifacts/capture-<utc>` | Carpeta de salida |
+| `CAPTURE_SECONDS` | `8` | Duración del demo |
+| `CAPTURE_FPS` | `15` | Frames por segundo |
+
+En **tu PC con monitor**, si ya tenés `DISPLAY`, el script usa Godot sin Xvfb.
+
+### ¿Puede el agente en la nube grabar?
+
+Sí, si en el entorno hay **Xvfb** y **ffmpeg** (este repo los usa en Linux). El agente debe ejecutar:
+
+```bash
+./scripts/capture-gameplay.sh
+```
+
+y adjuntar `artifacts/capture-*/demo.mp4` o los PNG al informe del PR. No sustituye jugar a mano, pero documenta regresiones visuales básicas.
+
+### Grabación manual (humano)
+
+- **OBS / QuickTime / Game Bar**: grabar ventana del juego (F5 en Godot).
+- **Godot Movie Maker** (editor): útil para trailers; no está automatizado en este repo aún.
+
 ## Estructura de herramientas en el repo
 
 ```
 scripts/
-  verify-godot.sh      # entrada única verificación
-.tools/                # gitignored — binario Godot descargado
+  verify-godot.sh       # tests + smoke headless (sin video)
+  capture-gameplay.sh   # demo + PNG + MP4
+.tools/                 # gitignored — binario Godot
+artifacts/              # gitignored — capturas
 code/tests/
-  run_tests.gd         # runner headless
+  run_tests.gd          # tests unitarios
+  demo_playback.gd      # demo para captura
 ```
 
 ## Solución de problemas
