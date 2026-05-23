@@ -60,6 +60,19 @@ Para ideas nuevas o rediseños, priorizar:
 
 Si en el entorno está disponible la skill de brainstorming del usuario, **usarla** para trabajo creativo antes de codificar a lo grande.
 
+## Feedback visual (cambios en pantalla)
+
+Cuando el usuario pida un **cambio visual** (sprites, UI, colores, escena, animación) o quiera **ver** el resultado:
+
+1. Tras implementar y pasar `./scripts/verify-godot.sh`, ejecutar **`./scripts/publish-visual-artifacts.sh`**.
+2. **Mostrar al usuario** la imagen leyendo `/opt/cursor/artifacts/visual/latest.png` (herramienta Read).
+3. En **PR**, incrustar esa ruta en markdown o HTML (`<img src="/opt/cursor/artifacts/visual/latest.png" />`).
+4. Mencionar si existe `/opt/cursor/artifacts/visual/latest.mp4` (video del demo automatizado).
+
+Esto **no** es Computer Use: no se controla el editor Godot con ratón. Es captura reproducible (Xvfb + demo script). Detalle: [`docs/agent-visual-feedback.md`](docs/agent-visual-feedback.md).
+
+Si el cambio no se ve en el demo actual, ampliar `code/tests/demo_playback.gd` en la misma tarea.
+
 ## Idioma
 
 Las respuestas al usuario deben seguir sus preferencias de idioma del momento (por defecto en este proyecto: **español**).
