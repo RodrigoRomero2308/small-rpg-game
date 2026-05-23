@@ -15,28 +15,40 @@ Documento de referencia para la organización del código en `code/`. Describe l
 ```
 code/
 ├── project.godot
-├── core/                          # Contratos y tipos de dominio (sin nodos de escena)
+├── core/
 │   └── commands/
-│       └── game_command.gd        # Comandos abstractos (movimiento, acción principal, …)
-├── systems/                       # Subsistemas con frontera clara
+│       └── game_command.gd
+├── systems/
 │   ├── input/
-│   │   └── player_input_reader.gd # InputMap → Array[GameCommand] (único lugar con Input.*)
-│   ├── movement/                  # (futuro) intents, knockback, bloqueos de movimiento
-│   ├── simulation/                # (futuro) tiempo de simulación, cooldowns, GCD
-│   ├── combat/                    # (futuro) validación y resolución de acciones
-│   └── debug/                     # (futuro) overlay y telemetría
-├── actors/                        # Lógica de entidades (scripts; no .tscn obligatorio aquí)
+│   │   └── player_input_reader.gd
+│   ├── simulation/
+│   │   ├── simulation_clock.gd
+│   │   └── temporal_locks.gd
+│   ├── combat/
+│   │   ├── ability_executor.gd
+│   │   └── ability_use_result.gd
+│   ├── debug/
+│   │   └── combat_debug_overlay.gd
+│   └── movement/                  # (futuro)
+├── actors/
+│   ├── components/
+│   │   └── actor_resources.gd
 │   └── player/
-│       └── player.gd              # CharacterBody2D: aplica comandos (movimiento + acción)
+│       ├── player.gd
+│       └── player_combat.gd
+├── content/
+│   └── abilities/
+│       ├── ability_definition.gd
+│       ├── ability_loadout.gd
+│       ├── pirate_default_loadout.tres
+│       └── resources/*.tres
 ├── scenes/
-│   ├── main.tscn                  # Punto de entrada: nivel + jugador
-│   ├── actors/
-│   │   └── player.tscn
-│   └── levels/
-│       └── prototype_arena.tscn   # Entornos de prueba / MVP
-├── content/                       # (futuro) datos: habilidades, enemigos, diálogos (.tres, .json)
-├── ui/                            # (futuro) HUD y menús (Control; señales hacia dominio)
-└── autoload/                      # (futuro) servicios globales acotados (p. ej. GameLog)
+│   ├── main.tscn
+│   ├── actors/player.tscn
+│   └── levels/prototype_arena.tscn
+├── tests/
+│   └── run_tests.gd
+└── ui/                            # (futuro)
 ```
 
 ## Convenciones de nombres
@@ -45,44 +57,55 @@ code/
 |----------|------------|---------|
 | Carpetas | `snake_case`, plural cuando agrupa varios | `systems/input/` |
 | Scripts GDScript | `snake_case.gd` | `player_input_reader.gd` |
-| `class_name` | PascalCase, alineado al rol | `GameCommand`, `Player` |
-| Escenas | `snake_case.tscn` | `player.tscn`, `prototype_arena.tscn` |
-| Acciones InputMap | `snake_case`, verbo o dirección | `move_left`, `primary_action` |
-| Comandos de dominio | tipos en `GameCommand.Type` | `MOVE_INTENT`, `PRIMARY_ACTION_PRESSED` |
+| `class_name` | PascalCase | `GameCommand`, `AbilityExecutor` |
+| Escenas | `snake_case.tscn` | `player.tscn` |
+| Acciones InputMap | `snake_case` | `cast_slot_2`, `primary_action` |
+| Comandos de dominio | `GameCommand.Type` | `CAST_SLOT_PRESSED`, `MOVE_INTENT` |
+| IDs de habilidad | `snake_case` StringName | `sabre_slash`, `pistol_shot` |
 
-## Flujo de input (issue #5)
+## Flujo: input → combate (MVP)
 
 ```
-InputMap (project.godot)
-        ↓  solo en PlayerInputReader
-   GameCommand[]  (core/commands)
-        ↓  poll por tick de física
-      Player  (actors/player)
-        ├→ velocidad / move_and_slide()
-        └→ acción principal (hoy: log debug; luego combate)
+InputMap
+    → PlayerInputReader → GameCommand[]
+    → Player (movimiento + reenvío)
+    → PlayerCombat → AbilityExecutor
+            ├ SimulationClock.now
+            ├ TemporalLocks (GCD + CD por ability_id)
+            └ ActorResources (vigor)
 ```
+
+Detalle de habilidades: [`mvp-abilities.md`](mvp-abilities.md).
 
 ## Estado de implementación
 
 | Ruta | Estado | Notas |
 |------|--------|-------|
-| `core/commands/game_command.gd` | Hecho | Comandos abstractos mínimos |
-| `systems/input/player_input_reader.gd` | Hecho | Lee acciones WASD/flechas + Space |
-| `actors/player/player.gd` | Hecho | Movimiento 2D + disparo de acción principal |
-| `scenes/actors/player.tscn` | Hecho | `CharacterBody2D` + placeholder visual |
-| `scenes/levels/prototype_arena.tscn` | Hecho | Suelo y bordes con colisión |
-| `systems/movement/`, `simulation/`, `combat/` | Planificado | Siguientes incrementos por sistema |
-| `content/`, `ui/`, `autoload/` | Planificado | Cuando exista estado de actor y combate base |
+| `core/commands/game_command.gd` | Hecho | `MOVE_INTENT`, `CAST_SLOT_PRESSED` |
+| `systems/input/` | Hecho | Slots 1–3 |
+| `systems/simulation/` | Hecho | Reloj + GCD + CD |
+| `systems/combat/` | Hecho | Validación y aplicación MVP |
+| `systems/debug/combat_debug_overlay.gd` | Hecho | Vigor, GCD, CDs |
+| `actors/components/actor_resources.gd` | Hecho | Vigor + regen |
+| `actors/player/player_combat.gd` | Hecho | Orquesta loadout |
+| `content/abilities/` | Hecho | 3 habilidades pirata `.tres` |
+| `tests/run_tests.gd` | Hecho | 4 pruebas headless |
+| `systems/movement/` | Planificado | Knockback, root |
+| Cast time / canales | Planificado | `cast_time > 0` en datos |
+| `ui/` barras pulidas | Planificado | Señales desde combate |
+
+## Verificación
+
+Desde la raíz del repo: `./scripts/verify-godot.sh` — ver [`dev-environment.md`](dev-environment.md).
 
 ## Cómo añadir algo nuevo
 
-1. Nombrar el **sistema** (una frase) y decidir si es carpeta nueva bajo `systems/` o extensión de una existente.
-2. Si hace falta un tipo compartido (comando, intent, evento), añadirlo en `core/` — no en scripts de escena.
-3. La escena instancia nodos y asigna scripts; no duplicar reglas de dominio en `.tscn`.
-4. Actualizar la tabla **Estado de implementación** de este documento en el mismo PR.
+1. Nombrar el **sistema** y su carpeta bajo `systems/` o dato bajo `content/`.
+2. Tipos compartidos en `core/`; definiciones de habilidad como `Resource` en `content/`.
+3. Actualizar esta tabla y `mvp-abilities.md` si cambia el contrato de combate.
 
 ## Relación con el resto del repo
 
-- Visión de sistemas y progresión: [`AGENTS.md`](../AGENTS.md)
-- Godot idiomático: [`docs/agents/godot-engine.md`](agents/godot-engine.md)
-- Movimiento (futuro 3D): [`docs/agents/movement-navigation.md`](agents/movement-navigation.md)
+- [`AGENTS.md`](../AGENTS.md) — visión por sistemas
+- [`docs/agents/action-combat.md`](agents/action-combat.md) — combate por acciones
+- [`docs/dev-environment.md`](dev-environment.md) — setup local y agente

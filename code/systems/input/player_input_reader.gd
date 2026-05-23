@@ -14,6 +14,10 @@ func poll_commands() -> Array[GameCommand]:
 		commands.append(GameCommand.move_intent(move_direction))
 
 	if Input.is_action_just_pressed(&"primary_action"):
-		commands.append(GameCommand.primary_action_pressed())
+		commands.append(GameCommand.cast_slot_pressed(1))
+	if Input.is_action_just_pressed(&"cast_slot_2"):
+		commands.append(GameCommand.cast_slot_pressed(2))
+	if Input.is_action_just_pressed(&"cast_slot_3"):
+		commands.append(GameCommand.cast_slot_pressed(3))
 
 	return commands

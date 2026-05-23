@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="AbilityLoadout" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://content/abilities/ability_loadout.gd" id="1"]
+[ext_resource type="Resource" path="res://content/abilities/resources/sabre_slash.tres" id="2"]
+[ext_resource type="Resource" path="res://content/abilities/resources/pistol_shot.tres" id="3"]
+[ext_resource type="Resource" path="res://content/abilities/resources/plank_strike.tres" id="4"]
+
+[resource]
+script = ExtResource("1")
+slot_1 = ExtResource("2")
+slot_2 = ExtResource("3")
+slot_3 = ExtResource("4")

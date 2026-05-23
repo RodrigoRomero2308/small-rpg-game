@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://b3q2cvf5m0x2p"]
+[gd_scene load_steps=4 format=3 uid="uid://b3q2cvf5m0x2p"]
 
 [ext_resource type="PackedScene" uid="uid://cprotoarena01" path="res://scenes/levels/prototype_arena.tscn" id="1_arena"]
 [ext_resource type="PackedScene" uid="uid://cplayer01scene" path="res://scenes/actors/player.tscn" id="2_player"]
+[ext_resource type="Script" path="res://systems/debug/combat_debug_overlay.gd" id="3_debug"]
 
 [node name="Main" type="Node2D"]
 
@@ -9,3 +10,7 @@
 
 [node name="Player" parent="." instance=ExtResource("2_player")]
 position = Vector2(320, 180)
+
+[node name="CombatDebugOverlay" type="CanvasLayer" parent="."]
+script = ExtResource("3_debug")
+player_combat_path = NodePath("../Player/PlayerCombat")

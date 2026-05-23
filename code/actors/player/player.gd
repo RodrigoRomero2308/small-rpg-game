@@ -7,6 +7,7 @@ extends CharacterBody2D
 @export var move_speed: float = 220.0
 
 @onready var _input_reader: PlayerInputReader = $PlayerInputReader
+@onready var _combat: PlayerCombat = $PlayerCombat
 
 
 func _physics_process(_delta: float) -> void:
@@ -16,8 +17,8 @@ func _physics_process(_delta: float) -> void:
 		match command.command_type:
 			GameCommand.Type.MOVE_INTENT:
 				move_direction = command.move_direction
-			GameCommand.Type.PRIMARY_ACTION_PRESSED:
-				_use_primary_action()
+			GameCommand.Type.PRIMARY_ACTION_PRESSED, GameCommand.Type.CAST_SLOT_PRESSED:
+				_combat.try_cast_slot(command.slot_index)
 
 	if move_direction != Vector2.ZERO:
 		velocity = move_direction.normalized() * move_speed
@@ -26,7 +27,3 @@ func _physics_process(_delta: float) -> void:
 
 	move_and_slide()
 
-
-func _use_primary_action() -> void:
-	# Placeholder hasta el sistema de combate/cooldowns; observable en consola de Godot.
-	print("[Player] primary_action ejecutada en ", global_position)
