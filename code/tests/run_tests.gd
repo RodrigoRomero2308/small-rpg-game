@@ -8,12 +8,14 @@ func _initialize() -> void:
 	failures += _test_gcd_blocks_second_use()
 	failures += _test_ability_cooldown()
 	failures += _test_insufficient_resource_no_gcd()
+	failures += _test_health_damage_and_death()
+	failures += _test_damage_applicator()
 
 	if failures > 0:
 		push_error("Tests fallidos: %d" % failures)
 		quit(1)
 	else:
-		print("[Tests] OK (4 suites)")
+		print("[Tests] OK (6 suites)")
 		quit(0)
 
 
@@ -85,5 +87,30 @@ func _test_insufficient_resource_no_gcd() -> int:
 	if locks.is_gcd_active(clock):
 		return 1
 	if resources.energy < 5.0:
+		return 1
+	return 0
+
+
+func _test_health_damage_and_death() -> int:
+	var health := HealthComponent.new()
+	health.max_health = 30.0
+	health.current_health = 30.0
+	var dealt := health.apply_damage(10.0)
+	if dealt != 10.0 or health.current_health != 20.0:
+		return 1
+	health.apply_damage(50.0)
+	if health.is_alive():
+		return 1
+	return 0
+
+
+func _test_damage_applicator() -> int:
+	var health := HealthComponent.new()
+	health.max_health = 50.0
+	health.current_health = 50.0
+	var ability := AbilityDefinition.new()
+	ability.damage = 18.0
+	var dealt := DamageApplicator.apply_ability(ability, health)
+	if dealt != 18.0 or health.current_health != 32.0:
 		return 1
 	return 0

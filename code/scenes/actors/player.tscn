@@ -1,8 +1,9 @@
-[gd_scene load_steps=5 format=3 uid="uid://cplayer01scene"]
+[gd_scene load_steps=6 format=3 uid="uid://cplayer01scene"]
 
 [ext_resource type="Script" path="res://actors/player/player.gd" id="1_player"]
 [ext_resource type="Script" path="res://systems/input/player_input_reader.gd" id="2_input"]
 [ext_resource type="Script" path="res://actors/player/player_combat.gd" id="3_combat"]
+[ext_resource type="Script" path="res://actors/components/health_component.gd" id="4_health"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
 size = Vector2(24, 24)
@@ -24,6 +25,10 @@ color = Color(0.18, 0.55, 0.92, 1)
 
 [node name="PlayerInputReader" type="Node" parent="."]
 script = ExtResource("2_input")
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("4_health")
+max_health = 100.0
 
 [node name="PlayerCombat" type="Node" parent="."]
 script = ExtResource("3_combat")

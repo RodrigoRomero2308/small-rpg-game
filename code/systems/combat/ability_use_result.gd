@@ -15,6 +15,7 @@ enum Status {
 var status: Status = Status.UNKNOWN_ABILITY
 var ability: AbilityDefinition
 var message: String = ""
+var damage_dealt: float = 0.0
 
 
 static func success(used_ability: AbilityDefinition) -> AbilityUseResult:

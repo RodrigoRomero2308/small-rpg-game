@@ -10,3 +10,4 @@ extends Resource
 @export var gcd_duration: float = 1.0
 @export var cooldown_duration: float = 0.0
 @export var cast_time: float = 0.0
+@export var damage: float = 0.0

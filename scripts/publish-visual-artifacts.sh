@@ -1,43 +1,70 @@
 #!/usr/bin/env bash
-# Genera captura del juego y la publica donde el agente/PR de Cursor pueden referenciarla.
+# Genera dos capturas: gameplay (escena) y log (eventos en pantalla).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PUBLISH_DIR="${CURSOR_ARTIFACTS_DIR:-/opt/cursor/artifacts/visual}"
-LATEST_CAPTURE=""
+TS="$(date -u +"%Y%m%dT%H%M%SZ")"
 
 "${ROOT}/scripts/verify-godot.sh" >/dev/null
-"${ROOT}/scripts/capture-gameplay.sh"
 
-LATEST_CAPTURE="$(find "${ROOT}/artifacts" -maxdepth 1 -type d -name 'capture-*' 2>/dev/null | sort | tail -n 1 || true)"
-if [[ -z "${LATEST_CAPTURE}" || ! -d "${LATEST_CAPTURE}" ]]; then
-  echo "No se encontró carpeta artifacts/capture-*" >&2
-  exit 1
-fi
+_run_capture() {
+	local mode="$1"
+	local out_dir="${ROOT}/artifacts/capture-${mode}-${TS}"
+	export OVERLAY_MODE="${mode}"
+	export CAPTURE_DIR="${out_dir}"
+	export CAPTURE_SECONDS="${CAPTURE_SECONDS:-14}"
+	"${ROOT}/scripts/capture-gameplay.sh" >&2
+	printf '%s' "${out_dir}"
+}
 
-echo "Usando captura: ${LATEST_CAPTURE}"
+echo "=== Captura gameplay (escena + HUD) ==="
+GAMEPLAY_DIR="$(_run_capture gameplay)"
+echo ""
+
+echo "=== Captura log (mismo demo, overlay de log) ==="
+LOG_DIR="$(_run_capture log)"
+echo ""
 
 mkdir -p "${PUBLISH_DIR}"
 
-FIRST_FRAME="$(find "${LATEST_CAPTURE}" -maxdepth 1 -name 'frame_*.png' | sort | head -n 1)"
-LAST_FRAME="$(find "${LATEST_CAPTURE}" -maxdepth 1 -name 'frame_*.png' | sort | tail -n 1)"
+copy_capture() {
+	local src_dir="$1"
+	local prefix="$2"
+	local mid_frame
+	mid_frame="$(find "${src_dir}" -maxdepth 1 -name 'frame_*.png' | sort | sed -n '40p')"
+	local last_frame
+	last_frame="$(find "${src_dir}" -maxdepth 1 -name 'frame_*.png' | sort | tail -n 1)"
+	if [[ -n "${mid_frame}" ]]; then
+		cp "${mid_frame}" "${PUBLISH_DIR}/${prefix}-frame.png"
+	fi
+	if [[ -n "${last_frame}" ]]; then
+		cp "${last_frame}" "${PUBLISH_DIR}/${prefix}-frame-end.png"
+	fi
+	if [[ -f "${src_dir}/demo.mp4" ]]; then
+		cp "${src_dir}/demo.mp4" "${PUBLISH_DIR}/${prefix}.mp4"
+	fi
+}
 
-if [[ -n "${FIRST_FRAME}" ]]; then
-  cp "${FIRST_FRAME}" "${PUBLISH_DIR}/latest.png"
-  cp "${LAST_FRAME}" "${PUBLISH_DIR}/latest-frame.png"
+copy_capture "${GAMEPLAY_DIR}" "latest-gameplay"
+copy_capture "${LOG_DIR}" "latest-log"
+
+cp "${GAMEPLAY_DIR}/meta.txt" "${PUBLISH_DIR}/meta-gameplay.txt" 2>/dev/null || true
+cp "${LOG_DIR}/meta.txt" "${PUBLISH_DIR}/meta-log.txt" 2>/dev/null || true
+
+# Compatibilidad con rutas anteriores
+if [[ -f "${PUBLISH_DIR}/latest-gameplay-frame-end.png" ]]; then
+	cp "${PUBLISH_DIR}/latest-gameplay-frame-end.png" "${PUBLISH_DIR}/latest.png"
 fi
-
-if [[ -f "${LATEST_CAPTURE}/demo.mp4" ]]; then
-  cp "${LATEST_CAPTURE}/demo.mp4" "${PUBLISH_DIR}/latest.mp4"
+if [[ -f "${PUBLISH_DIR}/latest-gameplay.mp4" ]]; then
+	cp "${PUBLISH_DIR}/latest-gameplay.mp4" "${PUBLISH_DIR}/latest.mp4"
 fi
-
-cp "${LATEST_CAPTURE}/meta.txt" "${PUBLISH_DIR}/meta.txt" 2>/dev/null || true
 
 cat > "${PUBLISH_DIR}/README.txt" <<EOF
-Captura generada desde: ${LATEST_CAPTURE}
-Para el agente: leer ${PUBLISH_DIR}/latest.png y mostrarla al usuario.
-Para PR: <img src="${PUBLISH_DIR}/latest.png" alt="Gameplay capture" />
-Video: ${PUBLISH_DIR}/latest.mp4
+Gameplay video: ${PUBLISH_DIR}/latest-gameplay.mp4
+Log video: ${PUBLISH_DIR}/latest-log.mp4
+Screenshot: ${PUBLISH_DIR}/latest-gameplay-frame-end.png
+Log screenshot: ${PUBLISH_DIR}/latest-log-frame-end.png
 EOF
 
 echo "Publicado en: ${PUBLISH_DIR}"

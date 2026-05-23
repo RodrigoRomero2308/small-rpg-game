@@ -8,7 +8,7 @@ CODE_DIR="${ROOT}/code"
 ARTIFACTS_DIR="${ROOT}/artifacts"
 TIMESTAMP="$(date -u +"%Y%m%dT%H%M%SZ")"
 CAPTURE_DIR="${CAPTURE_DIR:-${ARTIFACTS_DIR}/capture-${TIMESTAMP}}"
-CAPTURE_SECONDS="${CAPTURE_SECONDS:-8}"
+CAPTURE_SECONDS="${CAPTURE_SECONDS:-14}"
 CAPTURE_FPS="${CAPTURE_FPS:-15}"
 
 # Reutilizar Godot de verify-godot si existe
@@ -25,6 +25,9 @@ export CAPTURE_DIR CAPTURE_SECONDS CAPTURE_FPS
 
 echo "Capturando en: ${CAPTURE_DIR}"
 echo "Duración: ${CAPTURE_SECONDS}s @ ${CAPTURE_FPS} fps"
+
+echo "Importando proyecto (autoloads y scripts)..."
+"${GODOT_BIN}" --headless --path "${CODE_DIR}" --import
 
 run_godot() {
   # Sin --headless: hace falta viewport real (Xvfb en CI/agente).

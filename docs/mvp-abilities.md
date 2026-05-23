@@ -4,11 +4,11 @@ Borrador de diseño para validar el **sistema de tiempo + GCD + CD + recurso** a
 
 Recurso del capitán en esta fase: **vigor** (implementado como `energy` en código; renombrable cuando exista UI).
 
-| Slot | ID | Nombre | Tecla (InputMap) | Tipo | Coste vigor | GCD global | CD propio | Rol en loop |
-|------|-----|--------|------------------|------|-------------|------------|-----------|-------------|
-| 1 | `sabre_slash` | Sablazo | Space / clic izq. (`primary_action` → slot 1) | Instantánea | 15 | 1,0 s | — | Golpe base, spam limitado por GCD |
-| 2 | `pistol_shot` | Disparo de pistola | `2` | Instantánea | 25 | 1,0 s | 4,0 s | Burst a distancia; pacing medio |
-| 3 | `plank_strike` | Golpe de tablón | `3` | Instantánea | 35 | 1,0 s | 8,0 s | Golpe fuerte; ventana de decisión |
+| Slot | ID | Nombre | Tecla (InputMap) | Tipo | Coste vigor | Daño | GCD global | CD propio | Rol en loop |
+|------|-----|--------|------------------|------|-------------|------|------------|-----------|-------------|
+| 1 | `sabre_slash` | Sablazo | Space / clic izq. (`primary_action` → slot 1) | Instantánea | 15 | 12 | 1,0 s | — | Golpe base, spam limitado por GCD |
+| 2 | `pistol_shot` | Disparo de pistola | `2` | Instantánea | 25 | 22 | 1,0 s | 4,0 s | Burst a distancia; pacing medio |
+| 3 | `plank_strike` | Golpe de tablón | `3` | Instantánea | 35 | 32 | 1,0 s | 8,0 s | Golpe fuerte; ventana de decisión |
 
 ## Reglas compartidas (MVP)
 
