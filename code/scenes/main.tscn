@@ -1,16 +1,26 @@
-[gd_scene load_steps=4 format=3 uid="uid://b3q2cvf5m0x2p"]
+[gd_scene load_steps=6 format=3 uid="uid://b3q2cvf5m0x2p"]
 
 [ext_resource type="PackedScene" uid="uid://cprotoarena01" path="res://scenes/levels/prototype_arena.tscn" id="1_arena"]
 [ext_resource type="PackedScene" uid="uid://cplayer01scene" path="res://scenes/actors/player.tscn" id="2_player"]
-[ext_resource type="Script" path="res://systems/debug/combat_debug_overlay.gd" id="3_debug"]
+[ext_resource type="PackedScene" uid="uid://ctrainingdummy01" path="res://scenes/actors/training_dummy.tscn" id="3_dummy"]
+[ext_resource type="Script" path="res://systems/debug/combat_debug_overlay.gd" id="4_debug"]
+[ext_resource type="Script" path="res://systems/combat/encounter_controller.gd" id="5_encounter"]
 
 [node name="Main" type="Node2D"]
 
 [node name="PrototypeArena" parent="." instance=ExtResource("1_arena")]
 
 [node name="Player" parent="." instance=ExtResource("2_player")]
-position = Vector2(320, 180)
+position = Vector2(260, 180)
+
+[node name="TrainingDummy" parent="." instance=ExtResource("3_dummy")]
+position = Vector2(420, 180)
+
+[node name="EncounterController" type="Node" parent="."]
+script = ExtResource("5_encounter")
 
 [node name="CombatDebugOverlay" type="CanvasLayer" parent="."]
-script = ExtResource("3_debug")
+script = ExtResource("4_debug")
 player_combat_path = NodePath("../Player/PlayerCombat")
+player_health_path = NodePath("../Player/HealthComponent")
+enemy_health_path = NodePath("../TrainingDummy/HealthComponent")

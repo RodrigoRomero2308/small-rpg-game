@@ -1,7 +1,6 @@
 extends SceneTree
-## Demo automatizado para captura visual (screenshots / video).
-## Uso: godot --path code -s res://tests/demo_playback.gd
-## Env: CAPTURE_DIR, CAPTURE_SECONDS, CAPTURE_FPS
+## Demo automatizado: movimiento, 3 habilidades y combate hasta victoria.
+## Env: CAPTURE_DIR, CAPTURE_SECONDS (default 14), CAPTURE_FPS, OVERLAY_MODE
 
 
 const MAIN_SCENE := preload("res://scenes/main.tscn")
@@ -14,17 +13,20 @@ func _initialize() -> void:
 			"user://captures/%s" % Time.get_datetime_string_from_system().replace(":", "-")
 		)
 	var duration := float(
-		OS.get_environment("CAPTURE_SECONDS") if OS.has_environment("CAPTURE_SECONDS") else "8"
+		OS.get_environment("CAPTURE_SECONDS") if OS.has_environment("CAPTURE_SECONDS") else "14"
 	)
 	var fps := int(OS.get_environment("CAPTURE_FPS") if OS.has_environment("CAPTURE_FPS") else "15")
 
 	DirAccess.make_dir_recursive_absolute(capture_dir)
 	print("[Capture] salida: ", capture_dir)
 
+	CombatLog.clear()
+
 	var main := MAIN_SCENE.instantiate()
 	root.add_child(main)
 
 	var driver := CaptureDriver.new()
+	driver.main = main
 	driver.capture_dir = capture_dir
 	driver.duration = duration
 	driver.fps = fps
@@ -32,8 +34,9 @@ func _initialize() -> void:
 
 
 class CaptureDriver extends Node:
+	var main: Node2D
 	var capture_dir: String = ""
-	var duration: float = 8.0
+	var duration: float = 14.0
 	var fps: int = 15
 
 	var _frame_interval: float = 1.0 / 15.0
@@ -43,17 +46,19 @@ class CaptureDriver extends Node:
 	var _done: bool = false
 	var _player: Player
 	var _combat: PlayerCombat
+	var _enemy_health: HealthComponent
 
 
 	func _ready() -> void:
 		_frame_interval = 1.0 / maxf(1, fps)
-		var main := get_parent().get_child(0)
 		_player = main.get_node_or_null("Player") as Player
 		_combat = main.get_node_or_null("Player/PlayerCombat") as PlayerCombat
-		if _combat == null:
-			push_error("demo_playback: falta PlayerCombat")
+		_enemy_health = main.get_node_or_null("TrainingDummy/HealthComponent") as HealthComponent
+		if _combat == null or _enemy_health == null:
+			push_error("demo_playback: faltan nodos de combate")
 			get_tree().quit(1)
 			return
+		CombatLog.add("[Capture] Demo combate iniciado")
 		_run_demo()
 
 
@@ -61,18 +66,28 @@ class CaptureDriver extends Node:
 		await get_tree().process_frame
 		await get_tree().process_frame
 		_save_frame()
-		await _press_move(&"move_right", 1.2)
-		_tap_slot(1)
-		await get_tree().create_timer(0.6).timeout
-		_tap_slot(1)
-		await get_tree().create_timer(0.5).timeout
-		_tap_slot(2)
-		await get_tree().create_timer(1.0).timeout
-		await _press_move(&"move_up", 0.8)
-		_tap_slot(3)
-		await get_tree().create_timer(1.2).timeout
-		await _press_move(&"move_left", 1.0)
-		_tap_slot(1)
+
+		await _press_move(&"move_right", 0.9)
+
+		var rotation := 0
+		while _enemy_health.is_alive() and _elapsed < duration - 0.3 and rotation < 8:
+			_tap_slot(1)
+			await get_tree().create_timer(1.05).timeout
+			if not _enemy_health.is_alive():
+				break
+			_tap_slot(2)
+			await get_tree().create_timer(1.05).timeout
+			if not _enemy_health.is_alive():
+				break
+			_tap_slot(3)
+			await get_tree().create_timer(1.05).timeout
+			rotation += 1
+
+		if _enemy_health.is_alive():
+			CombatLog.add("[Capture] Objetivo sigue vivo (timeout demo)")
+		else:
+			CombatLog.add("[Capture] Objetivo derrotado en demo")
+
 		while _elapsed < duration:
 			await get_tree().process_frame
 		_finish()
@@ -91,7 +106,6 @@ class CaptureDriver extends Node:
 		Input.action_press(action)
 		var remaining := seconds
 		while remaining > 0.0 and not _done:
-			var step := minf(remaining, get_process_delta_time() if is_processing() else 0.016)
 			await get_tree().create_timer(minf(remaining, 0.05)).timeout
 			remaining -= 0.05
 		Input.action_release(action)
@@ -127,6 +141,7 @@ class CaptureDriver extends Node:
 			meta.store_line("frames=%d" % _frame_index)
 			meta.store_line("duration=%.2f" % _elapsed)
 			meta.store_line("fps=%d" % fps)
+			meta.store_line("overlay=%s" % OS.get_environment("OVERLAY_MODE"))
 			meta.close()
 		print("[Capture] listo: %d frames" % _frame_index)
 		get_tree().quit(0)

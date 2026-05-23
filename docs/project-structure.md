@@ -87,8 +87,12 @@ Detalle de habilidades: [`mvp-abilities.md`](mvp-abilities.md).
 | `systems/combat/` | Hecho | Validación y aplicación MVP |
 | `systems/debug/combat_debug_overlay.gd` | Hecho | Vigor, GCD, CDs |
 | `actors/components/actor_resources.gd` | Hecho | Vigor + regen |
-| `actors/player/player_combat.gd` | Hecho | Orquesta loadout |
-| `content/abilities/` | Hecho | 3 habilidades pirata `.tres` |
+| `actors/components/health_component.gd` | Hecho | HP, daño, muerte |
+| `actors/enemies/training_dummy.gd` | Hecho | Objetivo MVP en arena |
+| `actors/player/player_combat.gd` | Hecho | Orquesta loadout + daño |
+| `systems/combat/damage_applicator.gd` | Hecho | Payload de daño |
+| `systems/combat/encounter_controller.gd` | Hecho | Victoria / derrota |
+| `content/abilities/` | Hecho | 3 habilidades + daño en `.tres` |
 | `tests/run_tests.gd` | Hecho | 4 pruebas headless |
 | `systems/movement/` | Planificado | Knockback, root |
 | Cast time / canales | Planificado | `cast_time > 0` en datos |

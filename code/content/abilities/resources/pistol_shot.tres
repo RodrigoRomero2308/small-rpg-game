@@ -11,3 +11,4 @@ respects_gcd = true
 gcd_duration = 1.0
 cooldown_duration = 4.0
 cast_time = 0.0
+damage = 22.0
