@@ -9,11 +9,13 @@ LATEST_CAPTURE=""
 "${ROOT}/scripts/verify-godot.sh" >/dev/null
 "${ROOT}/scripts/capture-gameplay.sh"
 
-LATEST_CAPTURE="$(find "${ROOT}/artifacts" -maxdepth 1 -type d -name 'capture-*' 2>/dev/null | sort | tail -n 1)"
+LATEST_CAPTURE="$(find "${ROOT}/artifacts" -maxdepth 1 -type d -name 'capture-*' 2>/dev/null | sort | tail -n 1 || true)"
 if [[ -z "${LATEST_CAPTURE}" || ! -d "${LATEST_CAPTURE}" ]]; then
   echo "No se encontró carpeta artifacts/capture-*" >&2
   exit 1
 fi
+
+echo "Usando captura: ${LATEST_CAPTURE}"
 
 mkdir -p "${PUBLISH_DIR}"
 
